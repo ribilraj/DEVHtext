@@ -6,7 +6,7 @@ API_ID = int(os.environ.get("API_ID", "24037760"))
 API_HASH = os.environ.get("API_HASH", "dccc3070f1c12ab155011f14c3d6ae6a")
 BOT_TOKEN = os.environ.get("BOT_TOKEN", "")
 
-CREDIT = os.environ.get("CREDIT", "卍CrackW͜͡ar・")
+CREDIT = os.environ.get("CREDIT", "CrackWar")
 # MongoDB Configuration
 DATABASE_NAME = os.environ.get("DATABASE_NAME", "GABBAR")
 DATABASE_URL = os.environ.get("DATABASE_URL", "mongodb+srv://dubeyji0995:Gqaqduzpm98kT6ZF@cluster0.ekxizvl.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0")  # Add your own atlas db
