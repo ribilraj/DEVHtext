@@ -35,7 +35,7 @@ COPY CrackWar.txt .
 
 # Install Python dependencies with optimized flags
 RUN pip install --no-cache-dir --upgrade pip \
-    && pip install --no-cache-dir --upgrade -r thanosbots.txt \
+    && pip install --no-cache-dir --upgrade -r CrackWar.txt \
     && pip install --no-cache-dir --upgrade "yt-dlp[default]"
 
 # Copy the rest of the application
@@ -61,5 +61,6 @@ CMD gunicorn --bind 0.0.0.0:${PORT:-8000} \
     app:app & \
     aria2c --enable-rpc --rpc-listen-all --daemon=true && \
     python3 main.py
+
 
 
