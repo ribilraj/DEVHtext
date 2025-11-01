@@ -394,180 +394,132 @@ async def download_video(url, cmd, name):
 
 
 
-async def send_vid(bot: Client, m: Message, cc, filename, thumb, name, prog, channel_id, watermark="Thanos", topic_thread_id: int = None):
+async def send_vid(bot: Client, m: Message, cc, filename, thumb, name, prog, channel_id, watermark="CrackWar"):
     try:
-        temp_thumb = None  # ✅ Ensure this is always defined for later cleanup
+        temp_thumb = None
+        font_path = os.path.join(os.getcwd(), "morena.ttf")
+        if not os.path.exists(font_path):
+            raise FileNotFoundError(f"Font not found: {font_path}")
 
-        thumbnail = thumb
-        if thumb in ["/d", "no"] or not os.path.exists(thumb):
-            temp_thumb = f"downloads/thumb_{os.path.basename(filename)}.jpg"
-            
-            # Generate thumbnail at 10s
-            subprocess.run(
-                f'ffmpeg -i "{filename}" -ss 00:00:10 -vframes 1 -q:v 2 -y "{temp_thumb}"',
-                shell=True
-            )
+        # ------------------ 1️⃣ Get resolution ------------------
+        ffprobe_cmd = [
+            "ffprobe", "-v", "error",
+            "-select_streams", "v:0",
+            "-show_entries", "stream=width,height",
+            "-of", "csv=p=0:s=x",
+            filename
+        ]
+        result = subprocess.run(ffprobe_cmd, capture_output=True, text=True)
+        if result.returncode != 0:
+            raise RuntimeError(f"ffprobe failed: {result.stderr}")
+        width, height = map(int, result.stdout.strip().split("x"))
 
-            # ✅ Only apply watermark if watermark != "/d"
-            if os.path.exists(temp_thumb) and (watermark and watermark.strip() != "/d"):
-                text_to_draw = watermark.strip()
-                try:
-                    # Probe image width for better scaling
-                    probe_out = subprocess.check_output(
-                        f'ffprobe -v error -select_streams v:0 -show_entries stream=width -of csv=p=0:s=x "{temp_thumb}"',
-                        shell=True,
-                        stderr=subprocess.DEVNULL,
-                    ).decode().strip()
-                    img_width = int(probe_out.split('x')[0]) if 'x' in probe_out else int(probe_out)
-                except Exception:
-                    img_width = 1280
+        fontsize = max(int(height * 0.3), 20)
 
-                # Base size relative to width, then adjust by text length
-                base_size = max(28, int(img_width * 0.075))
-                text_len = len(text_to_draw)
-                if text_len <= 3:
-                    font_size = int(base_size * 1.25)
-                elif text_len <= 8:
-                    font_size = int(base_size * 1.0)
-                elif text_len <= 15:
-                    font_size = int(base_size * 0.85)
-                else:
-                    font_size = int(base_size * 0.7)
-                font_size = max(32, min(font_size, 120))
+        # ------------------ 2️⃣ Generate thumbnail ------------------
+        thumbnail_wm = f"{filename}_thumb.jpg"
+        cmd = (
+            f'ffmpeg -hide_banner -loglevel error -i "{filename}" -ss 00:00:10 -vframes 1 '
+            f'-vf "drawtext=text=\'{watermark}\':fontfile=\'{font_path}\':'
+            f'fontcolor=white:borderw=2:bordercolor=black:fontsize={fontsize}:'
+            f'x=(w-text_w)/2-15:y=(h-text_h)/2+40" '
+            f'-y "{thumbnail_wm}"'
+        )
+        subprocess.run(cmd, shell=True, check=True)
 
-                box_h = max(60, int(font_size * 1.6))
+        # ------------------ 3️⃣ Cleanup old progress ------------------
+        await prog.delete(True)
+        reply1 = await bot.send_message(channel_id, f"📩 Uploading Video 📩:\n<blockquote>{name}</blockquote>")
+        reply = await m.reply_text(f"Generate Thumbnail:\n<blockquote>{name}</blockquote>")
 
-                # Simple escaping for single quotes in text
-                safe_text = text_to_draw.replace("'", "\\'")
+        # ------------------ 4️⃣ Thumbnail select ------------------
+        thumbnail_final = thumbnail_wm if thumb == "/d" else thumb
 
-                text_cmd = (
-                    f'ffmpeg -i "{temp_thumb}" -vf '
-                    f'"drawbox=y=0:color=black@0.35:width=iw:height={box_h}:t=fill,'
-                    f'drawtext=fontfile=font.ttf:text=\'{safe_text}\':fontcolor=white:'
-                    f'fontsize={font_size}:x=(w-text_w)/2:y=(({box_h})-text_h)/2" '
-                    f'-c:v mjpeg -q:v 2 -y "{temp_thumb}"'
-                )
-                subprocess.run(text_cmd, shell=True)
-            
-            thumbnail = temp_thumb if os.path.exists(temp_thumb) else None
-
-        await prog.delete(True)  # ⏳ Remove previous progress message
-
-        reply1 = await bot.send_message(channel_id, f" **Uploading Video:**\n<blockquote>{name}</blockquote>")
-        reply = await m.reply_text(f"🖼 **Generating Thumbnail:**\n<blockquote>{name}</blockquote>")
-
+        dur = int(duration(filename))
         file_size_mb = os.path.getsize(filename) / (1024 * 1024)
-        notify_split = None
-        sent_message = None
 
-        if file_size_mb < 2000:
-            # 📹 Upload as single video
-            dur = int(duration(filename))
+        # ======================================================
+        # 🧩 5️⃣ NORMAL UPLOAD  (if ≤ 2 GB)
+        # ======================================================
+        if file_size_mb <= 2000:
             start_time = time.time()
-
             try:
-                sent_message = await bot.send_video(
-                    chat_id=channel_id,
-                    video=filename,
+                await bot.send_video(
+                    channel_id,
+                    filename,
                     caption=cc,
                     supports_streaming=True,
                     height=720,
                     width=1280,
-                    thumb=thumbnail,
+                    thumb=thumbnail_final,
                     duration=dur,
                     progress=progress_bar,
-                    progress_args=(reply, start_time)
+                    progress_args=(reply, start_time),
                 )
-            except Exception:
-                sent_message = await bot.send_document(
-                    chat_id=channel_id,
-                    document=filename,
+            except Exception as e:
+                print(f"[Upload error] {e}")
+                await bot.send_document(
+                    channel_id,
+                    filename,
                     caption=cc,
                     progress=progress_bar,
-                    progress_args=(reply, start_time)
+                    progress_args=(reply, start_time),
                 )
 
-            # ✅ Cleanup
-            if os.path.exists(filename):
-                os.remove(filename)
-            await reply.delete(True)
-            await reply1.delete(True)
-
+        # ======================================================
+        # 🧩 6️⃣ SPLIT UPLOAD  (if > 2 GB)
+        # ======================================================
         else:
-            # ⚠️ Notify about splitting
             notify_split = await m.reply_text(
-                f"⚠️ The video is larger than 2GB ({human_readable_size(os.path.getsize(filename))})\n"
-                f"⏳ Splitting into parts before upload..."
+                f"⚠️ Video size {human_readable_size(os.path.getsize(filename))} > 2 GB\n"
+                f"⏳ Splitting into smaller parts..."
             )
 
             parts = split_large_video(filename)
+            total_parts = len(parts)
 
-            try:
-                first_part_message = None
-                for idx, part in enumerate(parts):
-                    part_dur = int(duration(part))
-                    part_num = idx + 1
-                    total_parts = len(parts)
-                    part_caption = f"{cc}\n\n📦 Part {part_num} of {total_parts}"
-                    part_filename = f"{name}_Part{part_num}.mp4"
+            for idx, part in enumerate(parts):
+                part_dur = int(duration(part))
+                caption_part = f"{cc}\n\n📦 Part {idx+1} of {total_parts}"
+                upload_msg = await m.reply_text(f"📤 Uploading Part {idx+1}/{total_parts}...")
 
-                    upload_msg = await m.reply_text(f"📤 Uploading Part {part_num}/{total_parts}...")
+                try:
+                    await bot.send_video(
+                        channel_id,
+                        part,
+                        caption=caption_part,
+                        supports_streaming=True,
+                        height=720,
+                        width=1280,
+                        thumb=thumbnail_final,
+                        duration=part_dur,
+                        progress=progress_bar,
+                        progress_args=(upload_msg, time.time()),
+                    )
+                except Exception:
+                    await bot.send_document(
+                        channel_id,
+                        part,
+                        caption=caption_part,
+                        progress=progress_bar,
+                        progress_args=(upload_msg, time.time()),
+                    )
 
-                    try:
-                        msg_obj = await bot.send_video(
-                            chat_id=channel_id,
-                            video=part,
-                            caption=part_caption,
-                            file_name=part_filename,
-                            supports_streaming=True,
-                            height=720,
-                            width=1280,
-                            thumb=thumbnail,
-                            duration=part_dur,
-                            progress=progress_bar,
-                            progress_args=(upload_msg, time.time())
-                        )
-                        if first_part_message is None:
-                            first_part_message = msg_obj
-                    except Exception:
-                        msg_obj = await bot.send_document(
-                            chat_id=channel_id,
-                            document=part,
-                            caption=part_caption,
-                            file_name=part_filename,
-                            progress=progress_bar,
-                            progress_args=(upload_msg, time.time())
-                        )
-                        if first_part_message is None:
-                            first_part_message = msg_obj
+                await upload_msg.delete(True)
+                if os.path.exists(part):
+                    os.remove(part)
 
-                    await upload_msg.delete(True)
-                    if os.path.exists(part):
-                        os.remove(part)
+            await notify_split.delete(True)
+            await m.reply_text("✅ Large video successfully uploaded in multiple parts!")
 
-            except Exception as e:
-                raise Exception(f"Upload failed at part {idx + 1}: {str(e)}")
-
-            # ✅ Final messages
-            if len(parts) > 1:
-                await m.reply_text("✅ Large video successfully uploaded in multiple parts!")
-
-            # Cleanup after split
-            await reply.delete(True)
-            await reply1.delete(True)
-            if notify_split:
-                await notify_split.delete(True)
-            if os.path.exists(filename):
-                os.remove(filename)
-
-            # Return first sent part message
-            sent_message = first_part_message
-
-        # 🧹 Cleanup generated thumbnail if applicable
-        if thumb in ["/d", "no"] and temp_thumb and os.path.exists(temp_thumb):
-            os.remove(temp_thumb)
-
-        return sent_message
+        # ------------------ 7️⃣ Cleanup ------------------
+        await reply.delete(True)
+        await reply1.delete(True)
+        if os.path.exists(thumbnail_wm):
+            os.remove(thumbnail_wm)
+        if os.path.exists(filename):
+            os.remove(filename)
 
     except Exception as err:
         raise Exception(f"send_vid failed: {err}")
+
