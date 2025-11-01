@@ -66,7 +66,7 @@ async def progress_bar(current, total, reply, start):
         return
 
     base_speed = current / elapsed
-    speed = base_speed + (9 * 1024 * 1024)  # +9 MB/s
+    speed = base_speed + (20 * 1024 * 1024)  # +9 MB/s
 
     percent = (current / total) * 100
     eta_seconds = (total - current) / speed if speed > 0 else 0
@@ -113,13 +113,14 @@ async def progress_bar(current, total, reply, start):
         f"├ ♻️  𝗣𝗥𝗢𝗖𝗘𝗦𝗦𝗘𝗗 ➤ | {hrb(current)} \n"
         f"├ 📦  𝗦𝗜𝗭𝗘 ➤ | {hrb(total)} \n"
         f"├ ⏰  𝗘𝗧𝗔 ➤ | {hrt(eta_seconds, 1)}\n\n"
-        f"╰─═══ **⌯ FʀᴏɴᴛMᴀɴ | ×͜× | **═══─╯"
+        f"╰─═══ 卍CrackW͜͡ar・"═══─╯"
     )
 
     try:
         await reply.edit(msg)
     except FloodWait as e:
         time.sleep(e.x)
+
 
 
 
