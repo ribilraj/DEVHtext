@@ -1,4 +1,3 @@
-
 import os
 import re
 import time
@@ -26,7 +25,6 @@ import m3u8
 from urllib.parse import urljoin
 from vars import *  # Add this import
 from db import Database
-
 
 
 def get_duration(filename):
