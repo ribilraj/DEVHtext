@@ -16,8 +16,6 @@ from subprocess import getstatusoutput
 
 # 🕒 Timezone
 import pytz
-from datetime import datetime
-from zoneinfo import ZoneInfo
 
 # 📦 Third-party Libraries
 import aiohttp
@@ -779,15 +777,15 @@ async def txt_handler(bot: Client, m: Message):
 
             elif "https://cpvod.testbook.com/" in url or "classplusapp.com/drm/" in url:
                 url = url.replace("https://cpvod.testbook.com/","https://media-cdn.classplusapp.com/drm/")
-                url = f"https://covercel.vercel.app/extract_keys?url={url}@bots_updatee&user_id=7290128282"
+                url = f"https://covercel.vercel.app/extract_keys?url={url}@bots_updatee&user_id={7290128282}"
                 mpd, keys = helper.get_mps_and_keys(url)
                 url = mpd
                 keys_string = " ".join([f"--key {key}" for key in keys])
 
             elif "classplusapp" in url:
-                signed_api = f"https://covercel.vercel.app/extract_keys?url={url}@bots_updatee&user_id=7290128282"
+                signed_api = f"https://covercel.vercel.app/extract_keys?url={url}@bots_updatee&user_id={7290128282}"
                 response = requests.get(signed_api, timeout=60)
-                url = response.text.strip()
+                #url = response.text.strip()
                 url = response.json()['url']  
                 
             elif "tencdn.classplusapp" in url:
@@ -840,7 +838,6 @@ async def txt_handler(bot: Client, m: Message):
                 cmd = f'yt-dlp -f "{ytf}" "{url}" -o "{name}.mp4"'
 
             try:
-                timestamp = datetime.now(ZoneInfo("Asia/Kolkata")).strftime("%d %B %Y • %I:%M %p")
                 cc = f"📘 <b>VIDEO DETAILS</b> 📘\n━━━━━━━━━━━━━━━━━━━━━━━\n📌 <b>Document ID:</b> #{str(count).zfill(3)}\n\n📝 <b>Title:</b> {name1}\n━━━━━━━━━━━━━━━━━━━━━━━\n📦 <b>Batch Name:</b>\n<blockquote>{b_name}</blockquote>\n━━━━━━━━━━━━━━━━━━━━━━━\n🛠️ <b>Uploader:</b> {CR}\n━━━━━━━━━━━━━━━━━━━━━━━\n🕒 {timestamp}"
                 cc1 = f"📘 <b>PDF DETAILS</b> 📘\n━━━━━━━━━━━━━━━━━━━━━━━\n📌 <b>PDF ID:</b> #{str(count).zfill(3)}\n\n📝 <b>Title:</b> {name1}.pdf\n━━━━━━━━━━━━━━━━━━━━━━━\n📦 <b>Batch Name:</b>\n<blockquote>{b_name}</blockquote>\n━━━━━━━━━━━━━━━━━━━━━━━\n🛠️ <b>Uploader:</b> {CR}\n━━━━━━━━━━━━━━━━━━━━━━━\n🕒 {timestamp}"
                 cczip = f"[📁]Zip Id : {str(count).zfill(3)}\n**Zip Title :** `{v_name} .zip`\n<blockquote><b>Batch Name : {b_name}\nTopic Name : {t_name}</b></blockquote>\n\n**Extracted by➤**{CR}\n"
@@ -1031,7 +1028,7 @@ async def txt_handler(bot: Client, m: Message):
         f"├ 🖼️ ɪᴍᴀɢᴇꜱ : <code>{img_count}</code>\n"
         "╰────────────────────────────\n\n"
         
-        "<i>ᴇxᴛʀᴀᴄᴛᴇᴅ ʙʏ ᴡɪᴢᴀʀᴅ ʙᴏᴛꜱ 🤖</i>"
+        "<i>ᴇxᴛʀᴀᴄᴛᴇᴅ ʙʏ CrackWar ʙᴏᴛꜱ 🤖</i>"
     )
 )
 
@@ -1105,7 +1102,7 @@ async def text_handler(bot: Client, m: Message):
 
             elif "https://cpvod.testbook.com/" in url or "classplusapp.com/drm/" in url:
                 url = url.replace("https://cpvod.testbook.com/","https://media-cdn.classplusapp.com/drm/")
-                url = f"https://covercel.vercel.app/extract_keys?url={url}@bots_updatee&user_id=7290128282"
+                url = f"https://covercel.vercel.app/extract_keys?url={url}@bots_updatee&user_id={7290128282}"
                 mpd, keys = helper.get_mps_and_keys(url)
                 url = mpd
                 keys_string = " ".join([f"--key {key}" for key in keys])
@@ -1160,9 +1157,9 @@ async def text_handler(bot: Client, m: Message):
                     url = base_url.replace("https://static-db-v2.classx.co.in", "https://appx-content-v2.classx.co.in")
 
             elif "classplusapp" in url:
-                signed_api = f"https://covercel.vercel.app/extract_keys?url={url}@bots_updatee&user_id=7290128282"
+                signed_api = f"https://covercel.vercel.app/extract_keys?url={url}@bots_updatee&user_id={7290128282}"
                 response = requests.get(signed_api, timeout=60)
-                url = response.text.strip()
+                #url = response.text.strip()
                 url = response.json()['url']  
 
             elif "tencdn.classplusapp" in url:
