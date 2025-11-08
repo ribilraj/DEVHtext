@@ -16,6 +16,8 @@ from subprocess import getstatusoutput
 
 # 🕒 Timezone
 import pytz
+from datetime import datetime
+from zoneinfo import ZoneInfo
 
 # 📦 Third-party Libraries
 import aiohttp
@@ -777,14 +779,14 @@ async def txt_handler(bot: Client, m: Message):
 
             elif "https://cpvod.testbook.com/" in url or "classplusapp.com/drm/" in url:
                 url = url.replace("https://cpvod.testbook.com/","https://media-cdn.classplusapp.com/drm/")
-                url = f"https://covercel.vercel.app/extract_keys?url={url}@bots_updatee&user_id=7793257011"
+                url = f"https://covercel.vercel.app/extract_keys?url={url}@bots_updatee&user_id=7290128282"
                 mpd, keys = helper.get_mps_and_keys(url)
                 url = mpd
                 keys_string = " ".join([f"--key {key}" for key in keys])
 
             elif "classplusapp" in url:
-                signed_api = f"https://covercel.vercel.app/extract_keys?url={url}@bots_updatee&user_id=7793257011"
-                response = requests.get(signed_api, timeout=40)
+                signed_api = f"https://covercel.vercel.app/extract_keys?url={url}@bots_updatee&user_id=7290128282"
+                response = requests.get(signed_api, timeout=60)
                 url = response.text.strip()
                 url = response.json()['url']  
                 
@@ -838,27 +840,15 @@ async def txt_handler(bot: Client, m: Message):
                 cmd = f'yt-dlp -f "{ytf}" "{url}" -o "{name}.mp4"'
 
             try:
-                cc = (
-    f"<b>🏷️ Iɴᴅᴇx ID  :</b> {str(count).zfill(3)}\n\n"
-    f"<b>🎞️  Tɪᴛʟᴇ :</b> {name1} \n\n"
-    f"<blockquote>📚  𝗕ᴀᴛᴄʜ : {b_name}</blockquote>"
-    f"\n\n<b>🎓  Uᴘʟᴏᴀᴅ Bʏ : {CR}</b>"
-)
-                cc1 = (
-    f"<b>🏷️ Iɴᴅᴇx ID :</b> {str(count).zfill(3)}\n\n"
-    f"<b>📑  Tɪᴛʟᴇ :</b> {name1} \n\n"
-    f"<blockquote>📚  𝗕ᴀᴛᴄʜ : {b_name}</blockquote>"
-    f"\n\n<b>🎓  Uᴘʟᴏᴀᴅ Bʏ : {CR}</b>"
-)
-                cczip = f'[📁]Zip Id : {str(count).zfill(3)}\n**Zip Title :** `{name1} .zip`\n<blockquote><b>Batch Name :</b> {b_name}</blockquote>\n\n**Extracted by➤**{CR}\n' 
-                ccimg = (
-    f"<b>🏷️ Iɴᴅᴇx ID <b>: {str(count).zfill(3)} \n\n"
-    f"<b>🖼️  Tɪᴛʟᴇ</b> : {name1} \n\n"
-    f"<blockquote>📚  𝗕ᴀᴛᴄʜ : {b_name}</blockquote>"
-    f"\n\n<b>🎓  Uᴘʟᴏᴀᴅ Bʏ : {CR}</b>"
-)
-                ccm = f'[🎵]Audio Id : {str(count).zfill(3)}\n**Audio Title :** `{name1} .mp3`\n<blockquote><b>Batch Name :</b> {b_name}</blockquote>\n\n**Extracted by➤**{CR}\n'
-                cchtml = f'[🌐]Html Id : {str(count).zfill(3)}\n**Html Title :** `{name1} .html`\n<blockquote><b>Batch Name :</b> {b_name}</blockquote>\n\n**Extracted by➤**{CR}\n'
+                timestamp = datetime.now(ZoneInfo("Asia/Kolkata")).strftime("%d %B %Y • %I:%M %p")
+                cc = f'📘 <b>VIDEO DETAILS</b> 📘\n━━━━━━━━━━━━━━━━━━━━━━━\n📌 <b>Document ID:</b> #{str(count).zfill(3)}\n\n📝 <b>Title:</b> {name1}\n━━━━━━━━━━━━━━━━━━━━━━━\n📦 <b>Batch Name:</b>\n<blockquote>{b_name}</blockquote>\n━━━━━━━━━━━━━━━━━━━━━━━\n🛠️ <b>Uploader:</b> {CR}\n━━━━━━━━━━━━━━━━━━━━━━━\n🕒 {timestamp}'
+                cc1 = f'📘 <b>PDF DETAILS</b> 📘\n━━━━━━━━━━━━━━━━━━━━━━━\n📌 <b>PDF ID:</b> #{str(count).zfill(3)}\n\n📝 <b>Title:</b> {name1}.pdf\n━━━━━━━━━━━━━━━━━━━━━━━\n📦 <b>Batch Name:</b>\n<blockquote>{b_name}</blockquote>\n━━━━━━━━━━━━━━━━━━━━━━━\n🛠️ <b>Uploader:</b> {CR}\n━━━━━━━━━━━━━━━━━━━━━━━\n🕒 {timestamp}'
+                cczip = f'[📁]Zip Id : {str(count).zfill(3)}\n**Zip Title :** `{v_name} .zip`\n<blockquote><b>Batch Name : {b_name}\nTopic Name : {t_name}</b></blockquote>\n\n**Extracted by➤**{CR}\n'\
+                ccimg = f'[🖼️]Img Id : {str(count).zfill(3)}\n**Img Title :** `{v_name} .jpg`\n<blockquote><b>Batch Name : {b_name}\nTopic Name : {t_name}</b></blockquote>\n\n**Extracted by➤**{CR}\n'
+                cchtml = f'[🌐]Html Id : {str(count).zfill(3)}\n**Html Title :** `{v_name} .html`\n<blockquote><b>Batch Name : {b_name}\nTopic Name : {t_name}</b></blockquote>\n\n**Extracted by➤**{CR}\n'
+                ccyt = f'[🎥]Vid Id : {str(count).zfill(3)}\n**Video Title :** `{v_name} .mp4`\n<a href="{url}">__**Click Here to Watch Stream**__</a>\n<blockquote><b>Batch Name : {b_name}\nTopic Name : {t_name}</b></blockquote>\n\n**Extracted by➤**{CR}\n'
+                ccm = f'[🎵]Mp3 Id : {str(count).zfill(3)}\n**Audio Title :** `{v_name} .mp3`\n<blockquote><b>Batch Name : {b_name}\nTopic Name : {t_name}</b></blockquote>\n\n**Extracted by➤**{CR}\n'
+
                   
                 if "drive" in url:
                     try:
@@ -1113,7 +1103,7 @@ async def text_handler(bot: Client, m: Message):
 
             elif "https://cpvod.testbook.com/" in url or "classplusapp.com/drm/" in url:
                 url = url.replace("https://cpvod.testbook.com/","https://media-cdn.classplusapp.com/drm/")
-                url = f"https://covercel.vercel.app/extract_keys?url={url}@bots_updatee&user_id=7793257011"
+                url = f"https://covercel.vercel.app/extract_keys?url={url}@bots_updatee&user_id=7290128282"
                 mpd, keys = helper.get_mps_and_keys(url)
                 url = mpd
                 keys_string = " ".join([f"--key {key}" for key in keys])
@@ -1168,8 +1158,8 @@ async def text_handler(bot: Client, m: Message):
                     url = base_url.replace("https://static-db-v2.classx.co.in", "https://appx-content-v2.classx.co.in")
 
             elif "classplusapp" in url:
-                signed_api = f"https://covercel.vercel.app/extract_keys?url={url}@bots_updatee&user_id=7793257011"
-                response = requests.get(signed_api, timeout=20)
+                signed_api = f"https://covercel.vercel.app/extract_keys?url={url}@bots_updatee&user_id=7290128282"
+                response = requests.get(signed_api, timeout=60)
                 url = response.text.strip()
                 url = response.json()['url']  
 
